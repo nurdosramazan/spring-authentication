@@ -6,13 +6,8 @@ import kz.nurdos.spring_security.dto.authentication.UserRegistrationRequest;
 import kz.nurdos.spring_security.exception.UnsuccessfulRegistrationException;
 import kz.nurdos.spring_security.models.ApplicationUser;
 import kz.nurdos.spring_security.repositories.UserRepository;
-import kz.nurdos.spring_security.security.ApplicationUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
