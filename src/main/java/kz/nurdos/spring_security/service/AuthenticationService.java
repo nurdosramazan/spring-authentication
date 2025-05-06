@@ -46,7 +46,7 @@ public class AuthenticationService {
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
-        return jwtService.generateJwtToken(userDetails.getUsername());
+        return jwtService.generateJwtToken(userDetails);
     }
 
     @Transactional
