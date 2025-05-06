@@ -19,7 +19,7 @@ public class ApplicationUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Set.of(new SimpleGrantedAuthority("USER"));
+        return Set.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
