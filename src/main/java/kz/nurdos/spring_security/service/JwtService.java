@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,11 +45,6 @@ public class JwtService {
                 .signWith(getSignInKey())
                 .compact();
     }
-    public boolean isTokenExpired(String token) {
-        Date tokenExpiration = extractClaims(token).getExpiration();
-        return tokenExpiration.before(new Date());
-    }
-
     public String extractUsername(String token) {
         Claims claims = extractClaims(token);
         return claims.getSubject();
@@ -55,7 +52,15 @@ public class JwtService {
 
     public List<String> extractRoles(String token) {
         Claims claims = extractClaims(token);
-        return claims.get("roles", List.class);
+        Object rolesClaim = claims.get("roles");
+
+        if (rolesClaim instanceof List<?> roles) {
+            return roles.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .toList();
+        }
+        return Collections.emptyList();
     }
 
     private Claims extractClaims(String token) {

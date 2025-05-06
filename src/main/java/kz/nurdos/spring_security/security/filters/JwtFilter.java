@@ -1,5 +1,9 @@
 package kz.nurdos.spring_security.security.filters;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,8 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -36,7 +38,33 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = extractToken(request);
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            authenticateRequest(token, request);
+            try {
+                authenticateRequest(token, request);
+            } catch (ExpiredJwtException exception) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token expired: " + exception.getMessage());
+                return;
+            } catch (SignatureException exception) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT signature validation failed: " + exception.getMessage());
+                return;
+            } catch (MalformedJwtException exception) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT token is malformed" + exception.getMessage());
+                return;
+            } catch (UnsupportedJwtException exception) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT token is unsupported" + exception.getMessage());
+                return;
+            } catch (IllegalArgumentException exception) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT claims string is empty or invalid" + exception.getMessage());
+                return;
+            } catch (Exception exception) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Could not set user authentication in security context" + exception.getMessage());
+                return;
+            }
         }
         filterChain.doFilter(request, response);
     }
@@ -55,17 +83,15 @@ public class JwtFilter extends OncePerRequestFilter {
         if (username == null)
             return;
 
-        if (!jwtService.isTokenExpired(token)) {
-            List<String> roles = jwtService.extractRoles(token);
-            List<GrantedAuthority> authorities = roles.stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
+        List<String> roles = jwtService.extractRoles(token);
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        }
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
 }
