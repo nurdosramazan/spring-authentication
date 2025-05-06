@@ -1,6 +1,6 @@
 package kz.nurdos.spring_security.configurations;
 
-import kz.nurdos.spring_security.security.JwtFilter;
+import kz.nurdos.spring_security.security.filters.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +21,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
+    private final JwtFilter jwtFilter;
+
     @Autowired
-    public SecurityConfiguration(UserDetailsService userDetailsService) {
+    public SecurityConfiguration(UserDetailsService userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
+        this.jwtFilter = jwtFilter;
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -36,7 +40,7 @@ public class SecurityConfiguration {
                     .requestMatchers("/auth/**").permitAll()
                     .anyRequest().authenticated()
             )
-            .addFilterBefore(getJwtFilter(), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
@@ -44,7 +48,7 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(getPasswordEncoder());
+        daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
 
         return daoAuthenticationProvider;
@@ -56,12 +60,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public PasswordEncoder getPasswordEncoder() {
+    public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public JwtFilter getJwtFilter() {
-        return new JwtFilter();
     }
 }

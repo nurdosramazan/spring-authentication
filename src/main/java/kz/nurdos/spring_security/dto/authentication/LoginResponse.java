@@ -4,6 +4,7 @@ import kz.nurdos.spring_security.dto.GeneralResponseModel;
 
 public class LoginResponse extends GeneralResponseModel {
     private final String jwtToken;
+
     public LoginResponse(boolean success, String message, String jwtToken) {
         super(success, message);
         this.jwtToken = jwtToken;

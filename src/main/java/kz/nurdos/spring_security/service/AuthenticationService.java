@@ -16,6 +16,7 @@ public class AuthenticationService {
     private final EntityMapperService entityMapperService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+
     @Autowired
     public AuthenticationService(UserRepository userRepository,
                                  EntityMapperService entityMapperService,
