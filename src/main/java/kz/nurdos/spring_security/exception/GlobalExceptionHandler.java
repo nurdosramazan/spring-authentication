@@ -14,4 +14,11 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new GeneralResponseModel(false, e.getMessage()));
     }
+
+    @ExceptionHandler(UnsuccessfulLoginException.class)
+    public ResponseEntity<GeneralResponseModel> handleUnsuccessfulLogin(UnsuccessfulLoginException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new GeneralResponseModel(false, exception.getMessage()));
+    }
 }

@@ -7,11 +7,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EntityMapperService {
+public class EntityMapper {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public EntityMapperService(PasswordEncoder passwordEncoder) {
+    public EntityMapper(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
