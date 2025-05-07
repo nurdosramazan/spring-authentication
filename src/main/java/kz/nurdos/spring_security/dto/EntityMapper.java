@@ -1,4 +1,4 @@
-package kz.nurdos.spring_security.service;
+package kz.nurdos.spring_security.dto;
 
 import kz.nurdos.spring_security.dto.authentication.UserRegistrationRequest;
 import kz.nurdos.spring_security.models.ApplicationUser;
@@ -7,11 +7,11 @@ import kz.nurdos.spring_security.models.enums.RoleType;
 import kz.nurdos.spring_security.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-@Service
+@Component
 public class EntityMapper {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;

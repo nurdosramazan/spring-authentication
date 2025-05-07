@@ -1,6 +1,7 @@
 package kz.nurdos.spring_security.service;
 
 import jakarta.transaction.Transactional;
+import kz.nurdos.spring_security.dto.EntityMapper;
 import kz.nurdos.spring_security.dto.authentication.LoginRequest;
 import kz.nurdos.spring_security.dto.authentication.UserRegistrationRequest;
 import kz.nurdos.spring_security.exception.UnsuccessfulLoginException;

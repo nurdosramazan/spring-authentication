@@ -62,7 +62,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return null;
         }
 
-        return header.substring(7);
+        return header.substring(TOKEN_PREFIX.length());
     }
 
     private void authenticateRequest(String token, HttpServletRequest request) {

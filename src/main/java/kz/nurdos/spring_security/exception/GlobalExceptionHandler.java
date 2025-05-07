@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ValidationResponse(false, "Invalid data provided. ", fieldErrors));
+                .body(new ValidationResponse(false, "Invalid data provided.", fieldErrors));
 
     }
 }
