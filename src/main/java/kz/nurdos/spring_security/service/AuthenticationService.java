@@ -10,9 +10,9 @@ import kz.nurdos.spring_security.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,38 +21,39 @@ public class AuthenticationService {
     private final EntityMapper entityMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
 
     @Autowired
     public AuthenticationService(UserRepository userRepository,
                                  EntityMapper entityMapper,
                                  AuthenticationManager authenticationManager,
-                                 JwtService jwtService,
-                                 UserDetailsService userDetailsService) {
+                                 JwtService jwtService) {
         this.userRepository = userRepository;
         this.entityMapper = entityMapper;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
     }
 
     public String login(LoginRequest request) {
+        Authentication authentication;
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     request.username(), request.password())
             );
         } catch (AuthenticationException exception) {
             throw new UnsuccessfulLoginException("Invalid login credentials");
         }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return jwtService.generateJwtToken(userDetails);
     }
 
     @Transactional
     public void registerUser(UserRegistrationRequest request) {
-        if (isUsernameTaken(request.username()))
+        if (isUsernameTaken(request.getUsername()))
             throw new UnsuccessfulRegistrationException("Username is already taken");
+
+        if (isEmailTaken(request.getEmail()))
+            throw new UnsuccessfulRegistrationException("Email is already taken");
 
         ApplicationUser user = entityMapper.toApplicationUser(request);
         userRepository.save(user);
@@ -60,5 +61,8 @@ public class AuthenticationService {
 
     private boolean isUsernameTaken(String username) {
         return userRepository.existsByUsername(username);
+    }
+    private boolean isEmailTaken(String email) {
+        return userRepository.existsByEmail(email);
     }
 }

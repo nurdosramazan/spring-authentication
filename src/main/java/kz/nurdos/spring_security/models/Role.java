@@ -13,7 +13,7 @@ import kz.nurdos.spring_security.models.enums.RoleType;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roleId;
+    private Integer roleId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)

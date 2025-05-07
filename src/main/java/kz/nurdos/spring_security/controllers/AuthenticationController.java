@@ -1,5 +1,6 @@
 package kz.nurdos.spring_security.controllers;
 
+import jakarta.validation.Valid;
 import kz.nurdos.spring_security.dto.GeneralResponseModel;
 import kz.nurdos.spring_security.dto.authentication.LoginRequest;
 import kz.nurdos.spring_security.dto.authentication.LoginResponse;
@@ -33,7 +34,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<GeneralResponseModel> register(@RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<GeneralResponseModel> register(@RequestBody @Valid UserRegistrationRequest request) {
         authenticationService.registerUser(request);
 
         return ResponseEntity

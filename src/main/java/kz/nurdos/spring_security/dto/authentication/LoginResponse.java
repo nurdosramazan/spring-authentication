@@ -3,11 +3,11 @@ package kz.nurdos.spring_security.dto.authentication;
 import kz.nurdos.spring_security.dto.GeneralResponseModel;
 
 public class LoginResponse extends GeneralResponseModel {
-    private final String jwtToken;
+    private final String token;
 
-    public LoginResponse(boolean success, String message, String jwtToken) {
+    public LoginResponse(boolean success, String message, String token) {
         super(success, message);
-        this.jwtToken = jwtToken;
+        this.token = token;
     }
 
     @Override
@@ -20,7 +20,7 @@ public class LoginResponse extends GeneralResponseModel {
         return super.getMessage();
     }
 
-    public String getJwtToken() {
-        return jwtToken;
+    public String getToken() {
+        return token;
     }
 }
