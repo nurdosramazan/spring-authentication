@@ -16,9 +16,11 @@ public class ApplicationUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
     @Override
-    @Transactional //todo: is this even needed here?
+    @Transactional //todo: is this even needed here? readOnly = true?
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("no account found for " + username));
+        // If you want to ensure roles are loaded within this transaction (though Spring Security usually does this by calling getAuthorities()):
+        // Hibernate.initialize(user.getRoles()); // Or user.getAuthorities().size(); to trigger it
     }
 }
