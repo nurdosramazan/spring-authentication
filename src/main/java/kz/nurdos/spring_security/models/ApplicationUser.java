@@ -9,18 +9,25 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
-public class ApplicationUser {
+@Table(name = "application_users")
+public class ApplicationUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -37,27 +44,44 @@ public class ApplicationUser {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER) //todo: must be lazy type
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>(); //maybe just remove roles and directly work with granted authorities? what is the need for middleman?
 
     @Column(updatable = false, nullable = false)
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Column(nullable = false)
+    private Instant updatedAt;
 
-    public String getUsername() {
-        return username;
+    private boolean accountNonExpired;
+
+    private boolean accountNonLocked;
+
+    private boolean credentialsNonExpired;
+
+    private boolean enabled;
+
+    public ApplicationUser() {}
+
+    public Long getId() {
+        return id;
     }
 
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public String getFirstName() {
@@ -72,16 +96,43 @@ public class ApplicationUser {
         return email;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() { //will this be called while transaction pool is open?
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().toString()))
+                .collect(Collectors.toSet());
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled; //todo: may be user for email verification or admin disabling
+    }
+
+    public Set<Role> getRoles() { //todo chnge to authorities
+        return roles;
     }
 
     public void setUsername(String username) {
@@ -104,15 +155,23 @@ public class ApplicationUser {
         this.email = email;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Set<Role> roles) { //todo chnge to authorities
         this.roles = roles;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setAccountNonExpired(boolean accountNonExpired) {
+        this.accountNonExpired = accountNonExpired;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
+    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
+        this.credentialsNonExpired = credentialsNonExpired;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

@@ -5,8 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import kz.nurdos.spring_security.models.ApplicationUser;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +27,8 @@ public class JwtService {
     @Value("${jwt.secret-key}")
     private String jwtSecretKey;
 
-    @Value("${jwt.expiration-ms}")
-    private long expirationMilliSeconds;
+    @Value("${jwt.access-token.expiration-ms}")
+    private long accessTokenExpirationMilliSeconds;
 
     private SecretKey signInKey;
 
@@ -47,7 +50,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMilliSeconds))
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationMilliSeconds))
                 .signWith(signInKey)
                 .compact();
     }

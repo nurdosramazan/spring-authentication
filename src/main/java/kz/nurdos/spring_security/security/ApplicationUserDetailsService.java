@@ -1,7 +1,6 @@
 package kz.nurdos.spring_security.security;
 
 import jakarta.transaction.Transactional;
-import kz.nurdos.spring_security.models.ApplicationUser;
 import kz.nurdos.spring_security.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,11 +16,9 @@ public class ApplicationUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
     @Override
-    @Transactional
+    @Transactional //todo: is this even needed here?
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        ApplicationUser user = userRepository.findByUsername(username)
+        return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("no account found for " + username));
-
-        return new ApplicationUserDetails(user);
     }
 }

@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 authenticateRequest(token, request);
-            } catch (ExpiredJwtException exception) {
+            } catch (ExpiredJwtException exception) { //todo: probably not the best way to return within filter chain like this
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token expired");
                 return;
