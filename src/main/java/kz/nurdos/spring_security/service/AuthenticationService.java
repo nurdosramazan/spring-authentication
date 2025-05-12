@@ -89,7 +89,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new UnsuccessfulRefreshTokenException("Refresh token not found or invalid."));
     }
 
-    public ApiResponse logoutUser(String refreshTokenValue) {
+    public ApiResponse logoutUser(String refreshTokenValue) { //todo: CRITICAL: after logout(deleting refresh token from db) user can still access api's with access token
         refreshTokenService.deleteByToken(refreshTokenValue);
         return new ApiResponse(true, "User logged out successfully");
     }
