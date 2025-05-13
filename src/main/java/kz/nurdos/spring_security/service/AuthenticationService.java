@@ -41,6 +41,7 @@ public class AuthenticationService {
         this.refreshTokenService = refreshTokenService;
     }
 
+    @Transactional
     public LoginResponse loginUser(LoginRequest request) {
         Authentication authentication;
         try {
@@ -74,7 +75,7 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public TokenRefreshResponse refreshToken(String requestRefreshToken) { //todo: why is this in AuthenticationService class?
+    public TokenRefreshResponse refreshToken(String requestRefreshToken) {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
@@ -83,7 +84,7 @@ public class AuthenticationService {
                     String newRefreshToken = refreshTokenService.createRefreshToken(user).getToken();
 
                     refreshTokenService.deleteByToken(requestRefreshToken);
-                    return new TokenRefreshResponse(true,"new Access and Refresh tokens generated", newAccessToken, newRefreshToken);
+                    return new TokenRefreshResponse(true,"new access and refresh tokens generated", newAccessToken, newRefreshToken);
                 })
                 .orElseThrow(() -> new UnsuccessfulRefreshTokenException("Refresh token not found or invalid."));
     }

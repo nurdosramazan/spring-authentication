@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnsuccessfulRefreshTokenException.class)
     public ResponseEntity<ApiResponse> handleUnsuccessfulRefreshToken(UnsuccessfulRefreshTokenException exception) {
         return ResponseEntity
-                .status(401)
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse(false, exception.getMessage()));
     }
 

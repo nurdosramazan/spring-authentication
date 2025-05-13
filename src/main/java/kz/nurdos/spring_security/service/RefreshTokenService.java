@@ -1,6 +1,6 @@
 package kz.nurdos.spring_security.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import kz.nurdos.spring_security.exception.RefreshTokenExpiredException;
 import kz.nurdos.spring_security.models.ApplicationUser;
 import kz.nurdos.spring_security.models.RefreshToken;
@@ -32,11 +32,8 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public RefreshToken createRefreshToken(ApplicationUser user) { //why not UserDetails as parameter?
-        refreshTokenRepository.findByUserId(user.getId())
-                .ifPresent(refreshTokenRepository::delete); //one session if user has multiple devices?
-
-        RefreshToken refreshToken = new RefreshToken(); //maybe have an args constructor?
+    public RefreshToken createRefreshToken(ApplicationUser user) {
+        RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
