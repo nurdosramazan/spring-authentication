@@ -1,6 +1,7 @@
-package kz.nurdos.spring_security.dto;
+package kz.nurdos.spring_security.mappers;
 
 import kz.nurdos.spring_security.dto.authentication.UserRegistrationRequest;
+import kz.nurdos.spring_security.exception.DefaultRoleNotFoundException;
 import kz.nurdos.spring_security.models.ApplicationUser;
 import kz.nurdos.spring_security.models.Role;
 import kz.nurdos.spring_security.models.enums.RoleType;
@@ -23,7 +24,8 @@ public class EntityMapper {
     }
 
     public ApplicationUser toApplicationUser(UserRegistrationRequest request) {
-        Role role = roleRepository.findByRoleName(RoleType.ROLE_USER).orElseThrow();
+        Role role = roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(() ->
+                new DefaultRoleNotFoundException("Default role ROLE_USER not found.", request));
 
         ApplicationUser user = new ApplicationUser();
         user.setUsername(request.getUsername());
@@ -32,6 +34,10 @@ public class EntityMapper {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setRoles(Set.of(role));
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
 
         return user;
     }

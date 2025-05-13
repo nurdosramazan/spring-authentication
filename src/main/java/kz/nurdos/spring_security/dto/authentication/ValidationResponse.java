@@ -1,10 +1,10 @@
 package kz.nurdos.spring_security.dto.authentication;
 
-import kz.nurdos.spring_security.dto.GeneralResponseModel;
+import kz.nurdos.spring_security.dto.ApiResponse;
 
 import java.util.List;
 
-public class ValidationResponse extends GeneralResponseModel {
+public class ValidationResponse extends ApiResponse {
     private final List<InvalidError> errors;
     public ValidationResponse(boolean success, String message, List<InvalidError> errors) {
         super(success, message);

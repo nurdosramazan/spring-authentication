@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +18,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+
+/*
+Potential Improvement (Deferred Topic): For even more consistent API error handling, especially for 401s/403s
+that might not be caught by your GlobalExceptionHandler (e.g., accessing a protected resource with no token at all,
+or a malformed token that JwtFilter rejects before it even hits a controller), you could later implement custom
+AuthenticationEntryPoint and AccessDeniedHandler. But what you have is functional and common.
+ */
 @Configuration
+@EnableWebSecurity
 public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;

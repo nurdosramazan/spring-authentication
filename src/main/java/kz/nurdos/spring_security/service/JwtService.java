@@ -24,8 +24,9 @@ public class JwtService {
     @Value("${jwt.secret-key}")
     private String jwtSecretKey;
 
-    @Value("${jwt.expiration-ms}")
-    private long expirationMilliSeconds;
+    @Value("${jwt.access-token.expiration-ms}")
+    private long accessTokenExpirationMilliSeconds;
+    public static final String ROLES_CLAIM = "roles";
 
     private SecretKey signInKey;
 
@@ -41,13 +42,13 @@ public class JwtService {
                 .collect(Collectors.toList());
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", roles);
+        claims.put(ROLES_CLAIM, roles);
 
         return Jwts.builder()
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMilliSeconds))
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationMilliSeconds))
                 .signWith(signInKey)
                 .compact();
     }
@@ -58,7 +59,7 @@ public class JwtService {
 
     public List<String> extractRoles(String token) {
         Claims claims = extractClaims(token);
-        Object rolesClaim = claims.get("roles");
+        Object rolesClaim = claims.get(ROLES_CLAIM);
 
         if (rolesClaim instanceof List<?> roles) {
             return roles.stream()

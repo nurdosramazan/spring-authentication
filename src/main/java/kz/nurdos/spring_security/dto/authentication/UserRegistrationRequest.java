@@ -13,7 +13,7 @@ public class UserRegistrationRequest {
     @Pattern(regexp = "^[a-zA-Z0-9._]+$", message = "Invalid symbols in username")
     private final String username;
 
-    @NotNull(message = "Password is not provided")
+    @NotBlank(message = "Password is blank")
     @Length(min = 8, message = "Password must have at least 8 characters")
     private final String password;
 
