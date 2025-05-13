@@ -5,11 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import kz.nurdos.spring_security.models.ApplicationUser;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +26,7 @@ public class JwtService {
 
     @Value("${jwt.access-token.expiration-ms}")
     private long accessTokenExpirationMilliSeconds;
+    public static final String ROLES_CLAIM = "roles";
 
     private SecretKey signInKey;
 
@@ -44,7 +42,7 @@ public class JwtService {
                 .collect(Collectors.toList());
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", roles);
+        claims.put(ROLES_CLAIM, roles);
 
         return Jwts.builder()
                 .claims(claims)
@@ -61,7 +59,7 @@ public class JwtService {
 
     public List<String> extractRoles(String token) {
         Claims claims = extractClaims(token);
-        Object rolesClaim = claims.get("roles");
+        Object rolesClaim = claims.get(ROLES_CLAIM);
 
         if (rolesClaim instanceof List<?> roles) {
             return roles.stream()

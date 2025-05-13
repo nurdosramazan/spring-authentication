@@ -44,13 +44,13 @@ public class ApplicationUser implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @ManyToMany(fetch = FetchType.EAGER) //todo: must be lazy type
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>(); //maybe just remove roles and directly work with granted authorities? what is the need for middleman?
+    private Set<Role> roles = new HashSet<>();
 
     @Column(updatable = false, nullable = false)
     @CreationTimestamp
@@ -97,7 +97,7 @@ public class ApplicationUser implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { //will this be called while transaction pool is open?
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName().toString()))
                 .collect(Collectors.toSet());

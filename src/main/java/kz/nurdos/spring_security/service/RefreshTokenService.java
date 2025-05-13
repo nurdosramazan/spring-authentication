@@ -27,7 +27,7 @@ public class RefreshTokenService {
         this.userRepository = userRepository;
     }
 
-    public Optional<RefreshToken> findByToken(String token) { //todo: consider returning RefreshToken using orElse/orElseThrow
+    public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }
 

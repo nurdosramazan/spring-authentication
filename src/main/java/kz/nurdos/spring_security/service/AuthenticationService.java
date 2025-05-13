@@ -1,6 +1,5 @@
 package kz.nurdos.spring_security.service;
 
-import jakarta.transaction.Transactional;
 import kz.nurdos.spring_security.exception.UnsuccessfulRefreshTokenException;
 import kz.nurdos.spring_security.mappers.EntityMapper;
 import kz.nurdos.spring_security.dto.ApiResponse;
@@ -19,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthenticationService {
@@ -73,17 +73,16 @@ public class AuthenticationService {
         return new ApiResponse(true, "User successfully created");
     }
 
+    @Transactional
     public TokenRefreshResponse refreshToken(String requestRefreshToken) { //todo: why is this in AuthenticationService class?
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    refreshTokenService.deleteByToken(requestRefreshToken); //will this delete refresh token from db
-                    // if an error occurs and user does not get new RT.
-                    // as a result user lost old rt and did not get new one.
-
                     String newAccessToken = jwtService.generateJwtToken(user);
                     String newRefreshToken = refreshTokenService.createRefreshToken(user).getToken();
+
+                    refreshTokenService.deleteByToken(requestRefreshToken);
                     return new TokenRefreshResponse(true,"new Access and Refresh tokens generated", newAccessToken, newRefreshToken);
                 })
                 .orElseThrow(() -> new UnsuccessfulRefreshTokenException("Refresh token not found or invalid."));

@@ -24,8 +24,8 @@ public class EntityMapper {
     }
 
     public ApplicationUser toApplicationUser(UserRegistrationRequest request) {
-        Role role = roleRepository.findByName(RoleType.ROLE_USER)
-                .orElseThrow(() -> new DefaultRoleNotFoundException("Default role ROLE_USER is not defined in the database."));
+        Role role = roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(() ->
+                new DefaultRoleNotFoundException("Default role ROLE_USER not found.", request));
 
         ApplicationUser user = new ApplicationUser();
         user.setUsername(request.getUsername());

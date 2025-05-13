@@ -15,11 +15,15 @@ import kz.nurdos.spring_security.models.enums.RoleType;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
     private RoleType name;
+
+    public Long getId() {
+        return id;
+    }
 
     public RoleType getName() {
         return name;

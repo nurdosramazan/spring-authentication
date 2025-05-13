@@ -24,7 +24,7 @@ trace: logger.error("An unexpected error occurred: ", exception);
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(UnsuccessfulRegistrationException.class)
+    @ExceptionHandler(UnsuccessfulRegistrationException.class) //what is this line for, why in parameter we also have the same class name?
     public ResponseEntity<ApiResponse> handleUnsuccessfulRegistration(UnsuccessfulRegistrationException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -74,14 +74,24 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse(false, exception.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleAllExceptions(Exception exception) {
-        //todo:
-        // CRITICAL: Log the exception here so you know what happened!
-        // private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-        // logger.error("Unhandled exception caught: ", exception);
+    @ExceptionHandler(DefaultRoleNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleDefaultRoleNotFound(DefaultRoleNotFoundException exception) {
+        //log the error:
+        //UserRegistrationRequest request = exception.getRequest();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse(false, "An unexpected error occurred, please contact support."));
     }
+
+
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ApiResponse> handleAllExceptions(Exception exception) {
+//        //todo:
+//        // CRITICAL: Log the exception here so you know what happened!
+//        // private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+//        // logger.error("Unhandled exception caught: ", exception);
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(new ApiResponse(false, "An unexpected error occurred, please contact support."));
+//    }
 }
