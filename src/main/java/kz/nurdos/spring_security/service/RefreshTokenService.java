@@ -32,11 +32,17 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public RefreshToken createRefreshToken(ApplicationUser user) {
+    public RefreshToken createRefreshToken(ApplicationUser user, String ipAddress, String userAgent) {
+        //is this even good idea to have all this metadata in the RefreshToken class? logically does it belong here?
+        // Also, I would like to keep history, e.g. every RefreshToken be kept in the history, or maybe archive or log
+        //for example if someone says he noticed a login, I can look at the history and see ip or which device.
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setIpAddress(ipAddress);
+        refreshToken.setUserAgent(userAgent);
+        refreshToken.setLastUsedAt(Instant.now());
 
         return refreshTokenRepository.save(refreshToken);
     }
@@ -61,5 +67,10 @@ public class RefreshTokenService {
     @Transactional
     public void deleteByToken(String token) {
         refreshTokenRepository.findByToken(token).ifPresent(refreshTokenRepository::delete);
+    }
+
+    @Transactional
+    public void save(RefreshToken refreshToken) {
+        refreshTokenRepository.save(refreshToken);
     }
 }

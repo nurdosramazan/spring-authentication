@@ -1,5 +1,6 @@
 package kz.nurdos.spring_security.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import kz.nurdos.spring_security.dto.ApiResponse;
 import kz.nurdos.spring_security.dto.authentication.LoginRequest;
@@ -27,8 +28,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> loginUser(@RequestBody @Valid LoginRequest loginRequest) {
-        LoginResponse loginResponse = authenticationService.loginUser(loginRequest);
+    public ResponseEntity<ApiResponse> loginUser(@RequestBody @Valid LoginRequest loginRequest, HttpServletRequest httpServletRequest) {
+        LoginResponse loginResponse = authenticationService.loginUser(loginRequest, httpServletRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -45,8 +46,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<ApiResponse> refreshToken(@RequestBody @Valid TokenRefreshRequest request) {
-        TokenRefreshResponse response = authenticationService.refreshToken(request.getRefreshToken());
+    public ResponseEntity<ApiResponse> refreshToken(@RequestBody @Valid TokenRefreshRequest tokenRefreshRequest, HttpServletRequest httpServletRequest) {
+        TokenRefreshResponse response = authenticationService.refreshToken(tokenRefreshRequest.getRefreshToken(), httpServletRequest);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

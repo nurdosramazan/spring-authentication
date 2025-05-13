@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "application_users")
 public class ApplicationUser implements UserDetails {
+
+    public ApplicationUser() {}
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -67,8 +70,6 @@ public class ApplicationUser implements UserDetails {
     private boolean credentialsNonExpired;
 
     private boolean enabled;
-
-    public ApplicationUser() {}
 
     public Long getId() {
         return id;
