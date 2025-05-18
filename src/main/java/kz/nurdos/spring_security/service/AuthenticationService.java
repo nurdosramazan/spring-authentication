@@ -1,6 +1,8 @@
 package kz.nurdos.spring_security.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import kz.nurdos.spring_security.dto.authentication.SessionsInfoResponse;
+import kz.nurdos.spring_security.dto.authentication.TokenRefreshRequest;
 import kz.nurdos.spring_security.exception.UnsuccessfulRefreshTokenException;
 import kz.nurdos.spring_security.mappers.EntityMapper;
 import kz.nurdos.spring_security.dto.ApiResponse;
@@ -21,7 +23,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.util.List;
 
 @Service
 public class AuthenticationService {
@@ -81,16 +83,14 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public TokenRefreshResponse refreshToken(String requestRefreshToken, HttpServletRequest httpServletRequest) {
+    public TokenRefreshResponse refreshToken(TokenRefreshRequest tokenRefreshRequest, HttpServletRequest httpServletRequest) {
+        String requestRefreshToken = tokenRefreshRequest.getRefreshToken();
+
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
-                //.map(RefreshToken::getUser)
-                .map(token -> {
-                    ApplicationUser user = token.getUser();
-                    token.setLastUsedAt(Instant.now());
-                    token.setIpAddress(getClientIpAddress(httpServletRequest));
-                    token.setUserAgent(httpServletRequest.getHeader("User-Agent")); //why are we setting if we are deleting the token row anyway?
-                    refreshTokenService.save(token);
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    refreshTokenService.deleteByToken(requestRefreshToken);
 
                     String newAccessToken = jwtService.generateJwtToken(user);
 
@@ -98,10 +98,38 @@ public class AuthenticationService {
                     String userAgent = httpServletRequest.getHeader("User-Agent");
                     String newRefreshToken = refreshTokenService.createRefreshToken(user, clientIpAddress, userAgent).getToken();
 
-                    refreshTokenService.deleteByToken(requestRefreshToken);
-                    return new TokenRefreshResponse(true,"new access and refresh tokens generated", newAccessToken, newRefreshToken);
+                    return new TokenRefreshResponse(true,"New access and refresh tokens generated", newAccessToken, newRefreshToken);
                 })
                 .orElseThrow(() -> new UnsuccessfulRefreshTokenException("Refresh token not found or invalid."));
+    }
+
+    @Transactional(readOnly = true)
+    public SessionsInfoResponse getActiveSessions(Authentication authentication, String header) {
+        Long userId = ((ApplicationUser) authentication.getPrincipal()).getId();
+        List<SessionsInfoResponse.Info> sessionsInfo =
+                refreshTokenService.getActiveSessionsForUser(userId);
+
+        return new SessionsInfoResponse(true, "Sessions list successfully fetched", sessionsInfo);
+    }
+
+    @Transactional
+    public ApiResponse revokeRefreshToken(TokenRefreshRequest tokenRefreshRequest, Authentication authentication) {
+        String token = tokenRefreshRequest.getRefreshToken();
+        Long userId = ((ApplicationUser) authentication.getPrincipal()).getId();
+
+        refreshTokenService.revokeRefreshToken(token, userId);
+
+        return new ApiResponse(true, "Session revoked successfully.");
+    }
+
+    @Transactional
+    public ApiResponse revokeOtherSessions(TokenRefreshRequest tokenRefreshRequest, Authentication authentication) {
+        String token = tokenRefreshRequest.getRefreshToken();
+        Long userId = ((ApplicationUser) authentication.getPrincipal()).getId();
+
+        refreshTokenService.revokeAllOtherRefreshTokens(token, userId);
+
+        return new ApiResponse(true, "All other sessions revoked.");
     }
 
     public ApiResponse logoutUser(String refreshTokenValue) { //todo: CRITICAL: after logout(deleting refresh token from db) user can still access api's with access token
