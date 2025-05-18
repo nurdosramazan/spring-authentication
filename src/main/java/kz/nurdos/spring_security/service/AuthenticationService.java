@@ -84,6 +84,7 @@ public class AuthenticationService {
     public TokenRefreshResponse refreshToken(String requestRefreshToken, HttpServletRequest httpServletRequest) {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
+                //.map(RefreshToken::getUser)
                 .map(token -> {
                     ApplicationUser user = token.getUser();
                     token.setLastUsedAt(Instant.now());
